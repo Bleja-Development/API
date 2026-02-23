@@ -11,6 +11,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.di.*
 import io.ktor.server.plugins.swagger.*
@@ -30,15 +31,9 @@ import kotlinx.serialization.Serializable
 fun Application.configureRouting() {
     install(Resources)
     routing {
+        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
         get("/") {
-            call.respondText("Hello World!")
-        }
-        get<Articles> { article ->
-            // Get all articles ...
-            call.respond("List of articles sorted starting from ${article.sort}")
+            call.respondRedirect("/swagger")
         }
     }
 }
-@Serializable
-@Resource("/articles")
-class Articles(val sort: String? = "new")
