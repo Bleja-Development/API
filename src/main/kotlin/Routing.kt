@@ -2,6 +2,8 @@ package com.makebleja
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.makebleja.routes.userRoutes
+import com.makebleja.services.UserService
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*
@@ -28,12 +30,17 @@ import java.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.serialization.Serializable
 
-fun Application.configureRouting() {
+fun Application.configureRouting(userService: UserService) { // Pass the service here
     install(Resources)
     routing {
+        // This tells Swagger to look for the file in src/main/resources/openapi/documentation.yaml
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
+
         get("/") {
             call.respondRedirect("/swagger")
         }
+
+        // Register your user routes here
+        userRoutes(userService)
     }
 }
