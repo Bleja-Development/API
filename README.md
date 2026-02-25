@@ -1,5 +1,15 @@
 # ktor-api-gateway
 
+You can test database connection on Aiven server by runing project by following one of options down below or clicking green play button in IntelliJ, and then go to /users endpoint. Server should retrieve list of all users in database(JSON).
+
+# Testing app
+
+I recommend installing Bruno or Postman and using it for testing services. For now web json is enough but for more complex POST request i recommend Postman or Bruno.
+
+For more information or question, contact Mihajlo or Veljko.
+
+# About project
+
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
 Here are some useful links to get you started:
@@ -48,4 +58,5 @@ If the server starts successfully, you'll see the following output:
 2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
 2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
 ```
+
 
