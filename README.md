@@ -6,6 +6,10 @@ You can test database connection on Aiven server by runing project by following 
 
 I recommend installing Postman and using it for testing request/response. For now web json is enough but for more complex POST request i recommend Postman.
 
+For more information or question, contact Mihajlo or Veljko.
+
+# About project
+
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
 Here are some useful links to get you started:
