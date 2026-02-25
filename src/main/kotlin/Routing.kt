@@ -30,17 +30,12 @@ import java.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.serialization.Serializable
 
-fun Application.configureRouting(userService: UserService) { // Pass the service here
+fun Application.configureRouting(userService: UserService) {
     install(Resources)
     routing {
-        // This tells Swagger to look for the file in src/main/resources/openapi/documentation.yaml
-        swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml")
-
-        get("/") {
-            call.respondRedirect("/swagger")
-        }
-
-        // Register your user routes here
         userRoutes(userService)
+        get("/") {
+            call.respondText("Server is running!")
+        }
     }
 }

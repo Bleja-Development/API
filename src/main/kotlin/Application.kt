@@ -10,19 +10,9 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    configureSockets()
-    configureFrameworks()
     configureSerialization()
     configureDatabases()
-    configureSecurity()
-    configureHTTP()
+
     val userService = UserService()
-
-    // Pass the service into your routing config
     configureRouting(userService)
-
-    routing {
-        swaggerUI(path = "swagger") {
-        }
-    }
 }
