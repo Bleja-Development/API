@@ -4,7 +4,7 @@ You can test database connection on Aiven server by runing project by following 
 
 # Testing app
 
-I recommend installing Postman and using it for testing request/response. For now web json is enough but for more complex POST request i recommend Postman.
+I recommend installing Bruno or Postman and using it for testing services. For now web json is enough but for more complex POST request i recommend Postman or Bruno.
 
 For more information or question, contact Mihajlo or Veljko.
 
