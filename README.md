@@ -1,5 +1,17 @@
 # ktor-api-gateway
 
+## Setup
+Create local.properties file in the root directory of project and insert database connection credentials which you can get from admins. When you commit changes to git, local.properties won't be included
+
+## Testing app
+You can test database connection on which is hosted on Aiven for now by runing project in IntelliJ and then going to /users endpoint. Server should retrieve list of all users in database(JSON).
+
+I recommend installing Bruno or Postman and using it for testing services.
+
+For more information, database credentials or other stuff, contact someone from backend team.
+
+# About project
+
 This project was created using the [Ktor Project Generator](https://start.ktor.io).
 
 Here are some useful links to get you started:
@@ -48,4 +60,5 @@ If the server starts successfully, you'll see the following output:
 2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
 2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
 ```
+
 
