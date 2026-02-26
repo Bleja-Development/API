@@ -4,11 +4,11 @@
 Create local.properties file in the root directory of project and insert database connection credentials which you can get from admins. When you commit changes to git, local.properties won't be included
 
 ## Testing app
-You can test database connection on Aiven server by runing project by following one of options down below or clicking green play button in IntelliJ, and then go to /users endpoint. Server should retrieve list of all users in database(JSON).
+You can test database connection on which is hosted on Aiven for now by runing project in IntelliJ and then going to /users endpoint. Server should retrieve list of all users in database(JSON).
 
-I recommend installing Bruno or Postman and using it for testing services. For now web json is enough but for more complex POST request i recommend Postman or Bruno.
+I recommend installing Bruno or Postman and using it for testing services.
 
-For more information or question, contact Mihajlo or Veljko.
+For more information, database credentials or other stuff, contact someone from backend team.
 
 # About project
 
