@@ -1,5 +1,7 @@
 # ktor-api-gateway
 
+## Setup
+Create local.properties file in the root directory of project and insert database connection credentials which you can get from admins. When you commit changes to git, local.properties won't be included
 
 ## Testing app
 You can test database connection on Aiven server by runing project by following one of options down below or clicking green play button in IntelliJ, and then go to /users endpoint. Server should retrieve list of all users in database(JSON).
