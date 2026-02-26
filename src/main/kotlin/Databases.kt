@@ -30,10 +30,10 @@ import org.jetbrains.exposed.v1.jdbc.Database
 
 fun Application.configureDatabases() {
     Database.connect(
-        url = "jdbc:postgresql://pg-5552a4a-mihajloradojicic-5da2.k.aivencloud.com:26239/defaultdb?sslmode=require",
+        url = "url goes here",
         driver = "org.postgresql.Driver",
-        user = "avnadmin",
-        password = "AVNS_1xthNKtuhETk7krgWqE"
+        user = "user goes here",
+        password = "password goes here"
     )
 }
 
