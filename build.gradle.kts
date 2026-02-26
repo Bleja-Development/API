@@ -39,5 +39,7 @@ dependencies {
     implementation(libs.exposed.java.time)
     testImplementation(libs.ktor.server.test.host)
     implementation("org.mindrot:jbcrypt:0.4")
+    implementation("io.ktor:ktor-server-request-validation")
+    implementation("io.ktor:ktor-server-status-pages")
     testImplementation(libs.kotlin.test.junit)
 }

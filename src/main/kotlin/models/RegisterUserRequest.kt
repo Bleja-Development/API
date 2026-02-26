@@ -1,4 +1,4 @@
-package com.makebleja.models.dto
+package com.makebleja.models
 
 import kotlinx.serialization.Serializable
 
@@ -10,5 +10,6 @@ data class RegisterUserRequest(
     val nickname: String,
     val dateOfBirth: String,
     val homeAddress: String,
-    val password: String
+    val password: String,
+    val phoneNumber: String
 )

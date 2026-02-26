@@ -1,8 +1,9 @@
 package com.makebleja.routes
 
-import com.makebleja.models.dto.RegisterUserRequest
+import com.makebleja.models.ApiResponse
+import com.makebleja.models.RegisterUserRequest
 import com.makebleja.services.UserService
-import io.ktor.server.application.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -17,16 +18,15 @@ fun Route.userRoutes(userService: UserService) {
                 call.respondText("Database Error: ${e.message}")
             }
         }
-        post("/register"){
+        post("/register") {
             val request = call.receive<RegisterUserRequest>()
 
-            try{
-                userService.registerUser(request)
-                call.respondText("Registered successfully!", status = io.ktor.http.HttpStatusCode.Created)
+            if (userService.getUserByEmail(request.email) != null) {
+                return@post call.respond(HttpStatusCode.Conflict, ApiResponse(false, "Email taken"))
             }
-            catch (e: Exception) {
-                call.respondText("Registration failed: ${e.message}", status = io.ktor.http.HttpStatusCode.BadRequest)
-            }
+
+            userService.registerUser(request)
+            call.respond(HttpStatusCode.Created, ApiResponse(true, "Success!"))
         }
     }
 }

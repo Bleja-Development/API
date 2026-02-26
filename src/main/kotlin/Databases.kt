@@ -27,13 +27,20 @@ import java.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.jdbc.Database
+import java.util.Properties
+import java.io.FileInputStream
 
 fun Application.configureDatabases() {
+    val properties = Properties()
+    val properiesFile = "local.properties"
+
+    val inputStream = FileInputStream(properiesFile)
+    properties.load(inputStream)
+
     Database.connect(
-        url = "jdbc:postgresql://pg-5552a4a-mihajloradojicic-5da2.k.aivencloud.com:26239/defaultdb?sslmode=require",
+        url = properties.getProperty("db.url") ?: "dummy_url",
         driver = "org.postgresql.Driver",
-        user = "avnadmin",
-        password = "AVNS_1xthNKtuhETk7krgWqE"
+        user = properties.getProperty("db.user") ?: "dummy_user",
+        password = properties.getProperty("db.password") ?: "dummy_password"
     )
 }
-
