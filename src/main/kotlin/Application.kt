@@ -21,9 +21,9 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     configureSerialization()
-    configureDatabases()
+    val props = configureDatabases()
 
-    val userService = UserService()
+    val userService = UserService(props)
     configureRouting(userService)
 
     install(RequestValidation) {

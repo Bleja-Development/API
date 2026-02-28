@@ -10,8 +10,11 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Properties
 
-class UserService {
+class UserService(private val props: Properties){
+    private val emailService = EmailService(props)
+
     fun getAllUsers(): List<UserResponse> = transaction {
         Users.selectAll().map { row ->
             UserResponse(
@@ -59,5 +62,7 @@ class UserService {
             it[code] = randomCode.toString()
             it[expiresAt] = Instant.now().plus(5, ChronoUnit.MINUTES)
         }
+
+        emailService.sendOtpCode(request.email, randomCode.toString())
     }
 }

@@ -41,5 +41,7 @@ dependencies {
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("io.ktor:ktor-server-request-validation")
     implementation("io.ktor:ktor-server-status-pages")
+    implementation("jakarta.mail:jakarta.mail-api:2.1.2")
+    implementation("org.eclipse.angus:jakarta.mail:2.0.2")
     testImplementation(libs.kotlin.test.junit)
 }
