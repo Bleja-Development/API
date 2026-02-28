@@ -2,6 +2,7 @@ package com.makebleja
 
 import com.makebleja.models.ApiResponse
 import com.makebleja.models.RegisterUserRequest
+import com.makebleja.services.OtpCleanupService
 import com.makebleja.services.UserService
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -10,18 +11,36 @@ import io.ktor.server.plugins.requestvalidation.RequestValidation
 import io.ktor.server.plugins.requestvalidation.RequestValidationException
 import io.ktor.server.plugins.requestvalidation.ValidationResult
 import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.plugins.swagger.*
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.minutes
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
 }
 
+fun Application.launchOtpCleanup(){
+    val cleanupService = OtpCleanupService()
+
+    launch(Dispatchers.IO){
+        while(isActive){
+            try{
+                cleanupService.cleanOtpCodes()
+            }catch(e: Exception){
+                println("ERROR: Cleanup failed: ${e.message}")
+            }
+            delay(20.minutes)
+        }
+    }
+}
 fun Application.module() {
     configureSerialization()
     val props = configureDatabases()
+    launchOtpCleanup()
 
     val userService = UserService(props)
     configureRouting(userService)
