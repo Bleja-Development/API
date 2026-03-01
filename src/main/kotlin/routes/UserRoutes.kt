@@ -6,6 +6,7 @@ import com.makebleja.models.RegisterUserRequest
 import com.makebleja.services.UserService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -29,7 +30,6 @@ fun Route.userRoutes(userService: UserService) {
             userService.registerUser(request)
             call.respond(HttpStatusCode.Created, ApiResponse(true, "Success!"))
         }
-
         post("/login") {
             val request = call.receive<LoginUserRequest>()
             val isSuccess = userService.logInUser(request)
@@ -44,6 +44,15 @@ fun Route.userRoutes(userService: UserService) {
                     HttpStatusCode.Unauthorized,
                     ApiResponse(success = false, message = "Invalid email or password")
                 )
+            }
+        }
+        post("/resend-otp") {
+            val email = call.receiveParameters()["email"] ?: return@post call.respond(HttpStatusCode.BadRequest)
+            try {
+                userService.resendOTP(email)
+                call.respond(HttpStatusCode.OK, ApiResponse(true, "A new code has been sent to your email."))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, ApiResponse(false, "Could not resend code: $e"))
             }
         }
     }

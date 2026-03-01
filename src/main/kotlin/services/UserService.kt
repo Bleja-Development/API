@@ -4,19 +4,18 @@ import com.makebleja.entities.Users
 import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
 import com.makebleja.models.UserResponse
-import io.ktor.server.plugins.di.DependencyInitializer
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.mindrot.jbcrypt.BCrypt
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Properties
-import javax.swing.text.BoxView
 
-class UserService(private val props: Properties){
+class UserService(props: Properties){
     private val emailService = EmailService(props)
 
     fun getAllUsers(): List<UserResponse> = transaction {
@@ -69,7 +68,27 @@ class UserService(private val props: Properties){
 
         emailService.sendOtpCode(request.email, randomCode.toString())
     }
+    fun resendOTP(email: String) = transaction {
+        val newCode = (100000..999999).random().toString()
+        val newExpiry = Instant.now().plus(5, ChronoUnit.MINUTES)
 
+        val existing = OtpCodes.selectAll().where { OtpCodes.email eq email }.singleOrNull()
+
+        if(existing != null){
+            OtpCodes.update({ OtpCodes.email eq email}){
+                it[code] = newCode
+                it[expiresAt] = newExpiry
+            }
+        }else{
+            OtpCodes.insert{
+                it[OtpCodes.email] = email
+                it[code] = newCode
+                it[expiresAt] = newExpiry
+            }
+        }
+
+        emailService.sendOtpCode(email, newCode)
+    }
     fun logInUser(request: LoginUserRequest): Boolean = transaction {
         val passwordFromDatabase =
             Users.select(Users.password)
