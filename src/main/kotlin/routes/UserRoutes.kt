@@ -29,11 +29,22 @@ fun Route.userRoutes(userService: UserService) {
             userService.registerUser(request)
             call.respond(HttpStatusCode.Created, ApiResponse(true, "Success!"))
         }
+
         post("/login") {
             val request = call.receive<LoginUserRequest>()
-            val answer = userService.logInUser(request)
+            val isSuccess = userService.logInUser(request)
 
-            call.respond(HttpStatusCode.OK, answer)
+            if (isSuccess) {
+                call.respond(
+                    HttpStatusCode.OK,
+                    ApiResponse(success = true, message = "Login successful!")
+                )
+            } else {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    ApiResponse(success = false, message = "Invalid email or password")
+                )
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.makebleja
 
 import com.makebleja.models.ApiResponse
+import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
 import com.makebleja.services.OtpCleanupService
 import com.makebleja.services.UserService
@@ -59,8 +60,14 @@ fun Application.module() {
                 else -> ValidationResult.Valid
             }
         }
+        validate<LoginUserRequest> { request ->
+            when {
+                request.email.isBlank() -> ValidationResult.Invalid("Email is required")
+                request.password.isBlank() -> ValidationResult.Invalid("Password is required")
+                else -> ValidationResult.Valid
+            }
+        }
     }
-
     install(StatusPages) {
         exception<RequestValidationException> { call, cause ->
             val errorResponse = ApiResponse(false, cause.reasons.joinToString())

@@ -70,23 +70,13 @@ class UserService(private val props: Properties){
         emailService.sendOtpCode(request.email, randomCode.toString())
     }
 
-    fun logInUser(request: LoginUserRequest): String = transaction {
-
+    fun logInUser(request: LoginUserRequest): Boolean = transaction {
         val passwordFromDatabase =
             Users.select(Users.password)
                 .where { Users.email eq request.email }
                 .map { it[Users.password] }
-                .singleOrNull()
+                .singleOrNull() ?: return@transaction false
 
-        if (passwordFromDatabase.isNullOrBlank()) {
-            return@transaction "User not found"
-        }
-
-        val matchedPassword = BCrypt.checkpw(request.password, passwordFromDatabase)
-
-        if(matchedPassword)
-            "Matched"
-        else
-            "Passwords doesn't match"
+        BCrypt.checkpw(request.password, passwordFromDatabase)
     }
 }
