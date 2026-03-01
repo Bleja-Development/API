@@ -1,6 +1,7 @@
 package com.makebleja.routes
 
 import com.makebleja.models.ApiResponse
+import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
 import com.makebleja.services.UserService
 import io.ktor.http.HttpStatusCode
@@ -27,6 +28,12 @@ fun Route.userRoutes(userService: UserService) {
 
             userService.registerUser(request)
             call.respond(HttpStatusCode.Created, ApiResponse(true, "Success!"))
+        }
+        post("/login") {
+            val request = call.receive<LoginUserRequest>()
+            val answer = userService.logInUser(request)
+
+            call.respond(HttpStatusCode.OK, answer)
         }
     }
 }

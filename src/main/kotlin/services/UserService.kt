@@ -1,16 +1,20 @@
 package com.makebleja.services
 
 import com.makebleja.entities.Users
+import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
 import com.makebleja.models.UserResponse
+import io.ktor.server.plugins.di.DependencyInitializer
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Properties
+import javax.swing.text.BoxView
 
 class UserService(private val props: Properties){
     private val emailService = EmailService(props)
@@ -64,5 +68,25 @@ class UserService(private val props: Properties){
         }
 
         emailService.sendOtpCode(request.email, randomCode.toString())
+    }
+
+    fun logInUser(request: LoginUserRequest): String = transaction {
+
+        val passwordFromDatabase =
+            Users.select(Users.password)
+                .where { Users.email eq request.email }
+                .map { it[Users.password] }
+                .singleOrNull()
+
+        if (passwordFromDatabase.isNullOrBlank()) {
+            return@transaction "User not found"
+        }
+
+        val matchedPassword = BCrypt.checkpw(request.password, passwordFromDatabase)
+
+        if(matchedPassword)
+            "Matched"
+        else
+            "Passwords doesn't match"
     }
 }
