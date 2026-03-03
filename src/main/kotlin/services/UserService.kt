@@ -1,10 +1,13 @@
 package com.makebleja.services
 
 import com.makebleja.entities.Users
+import com.makebleja.models.ApiResponse
 import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
 import com.makebleja.models.UserResponse
+import com.makebleja.models.VerifyCodeRequest
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -17,21 +20,6 @@ import java.util.Properties
 
 class UserService(props: Properties){
     private val emailService = EmailService(props)
-
-    fun getAllUsers(): List<UserResponse> = transaction {
-        Users.selectAll().map { row ->
-            UserResponse(
-                id = row[Users.id].toString(),
-                email = row[Users.email],
-                name = row[Users.name],
-                surname = row[Users.surname],
-                nickname = row[Users.nickname],
-                dateOfBirth = row[Users.dateOfBirth].toString(),
-                homeAddress = row[Users.homeAddress],
-                phoneNumber = row[Users.phoneNumber]
-            )
-        }
-    }
     fun getUserByEmail(email: String): UserResponse? = transaction {
         Users.selectAll().where{ Users.email eq email }
             .map { row ->
@@ -88,6 +76,47 @@ class UserService(props: Properties){
         }
 
         emailService.sendOtpCode(email, newCode)
+    }
+    fun verifyAccount(request: VerifyCodeRequest): ApiResponse = transaction {
+        val otpRow = OtpCodes
+            .selectAll()
+            .where { OtpCodes.email eq request.email }
+            .singleOrNull() ?: return@transaction ApiResponse(false, "Code not found")
+
+        val dbCode = otpRow[OtpCodes.code]
+        val expiry = otpRow[OtpCodes.expiresAt]
+        val now = Instant.now()
+        val currentAttempts = otpRow[OtpCodes.attempts]
+
+        if(expiry.isBefore(now)){
+            OtpCodes.deleteWhere { OtpCodes.email eq request.email }
+            return@transaction ApiResponse(false, "Code expired")
+        }
+
+        if(dbCode == request.code){
+            OtpCodes.deleteWhere { OtpCodes.email eq request.email }
+            Users.update(where = { Users.email eq request.email }){
+                it[verified] = true
+                it[updatedAt] = now
+            }
+            return@transaction ApiResponse(true, "Account verified!")
+        } else{
+            val newAttempts = currentAttempts + 1
+
+            if(newAttempts >= 3){
+                OtpCodes.deleteWhere { OtpCodes.email eq request.email }
+                return@transaction ApiResponse(false, "Too many failed attempts, request a new code")
+            } else{
+                OtpCodes.update({ OtpCodes.email eq request.email }) {
+                    it[attempts] = newAttempts
+                }
+                return@transaction ApiResponse(false, "Invalid code, you have ${3-newAttempts} attempts left")
+            }
+        }
+    }
+    fun isVerified(email: String): Boolean = transaction {
+        val verified = Users.select(Users.verified).where{ Users.email eq email }.map{ it[Users.verified] }.singleOrNull() ?: false
+        verified
     }
     fun logInUser(request: LoginUserRequest): Boolean = transaction {
         val passwordFromDatabase =

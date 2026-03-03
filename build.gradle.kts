@@ -43,5 +43,6 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages")
     implementation("jakarta.mail:jakarta.mail-api:2.1.2")
     implementation("org.eclipse.angus:jakarta.mail:2.0.2")
+    implementation("io.ktor:ktor-server-rate-limit")
     testImplementation(libs.kotlin.test.junit)
 }

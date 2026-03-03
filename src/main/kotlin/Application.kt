@@ -3,11 +3,15 @@ package com.makebleja
 import com.makebleja.models.ApiResponse
 import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
+import com.makebleja.models.VerifyCodeRequest
 import com.makebleja.services.OtpCleanupService
 import com.makebleja.services.UserService
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
+import io.ktor.server.plugins.origin
+import io.ktor.server.plugins.ratelimit.RateLimit
+import io.ktor.server.plugins.ratelimit.RateLimitName
 import io.ktor.server.plugins.requestvalidation.RequestValidation
 import io.ktor.server.plugins.requestvalidation.RequestValidationException
 import io.ktor.server.plugins.requestvalidation.ValidationResult
@@ -19,6 +23,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -43,8 +48,16 @@ fun Application.module() {
     val props = configureDatabases()
     launchOtpCleanup()
 
+    install(RateLimit) {
+        register(RateLimitName("otp-limit")) {
+            rateLimiter(limit = 5, refillPeriod = 60.seconds)
+            requestKey { call -> call.request.origin.remoteHost }
+        }
+    }
+
     val userService = UserService(props)
     configureRouting(userService)
+
 
     install(RequestValidation) {
         validate<RegisterUserRequest> { request ->
@@ -67,6 +80,13 @@ fun Application.module() {
                 else -> ValidationResult.Valid
             }
         }
+        validate<VerifyCodeRequest> { request ->
+            when{
+                request.code.isBlank() -> ValidationResult.Invalid("Incorrect code")
+                request.code.length != 6 -> ValidationResult.Invalid("Code must have 6 digits")
+                else -> ValidationResult.Valid
+            }
+        }
     }
     install(StatusPages) {
         exception<RequestValidationException> { call, cause ->
@@ -75,6 +95,16 @@ fun Application.module() {
                 text = Json.encodeToString(ApiResponse.serializer(), errorResponse),
                 contentType = ContentType.Application.Json,
                 status = HttpStatusCode.BadRequest
+            )
+        }
+        status(HttpStatusCode.TooManyRequests) { call, status ->
+            val retryAfter = call.response.headers["Retry-After"] ?: "a few"
+            val errorResponse = ApiResponse(false, "Too many requests. Wait $retryAfter seconds.")
+
+            call.respondText(
+                text = Json.encodeToString(ApiResponse.serializer(), errorResponse),
+                contentType = ContentType.Application.Json,
+                status = status
             )
         }
     }
