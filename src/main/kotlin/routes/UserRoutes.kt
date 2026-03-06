@@ -15,6 +15,7 @@ import io.ktor.server.routing.*
 
 fun Route.userRoutes(userService: UserService) {
     route("/users"){
+        get("/test") { call.respond(userService.test() ?: HttpStatusCode.NotFound) }
         post("/register") {
             val request = call.receive<RegisterUserRequest>()
 

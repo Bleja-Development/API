@@ -20,6 +20,22 @@ import java.util.Properties
 
 class UserService(props: Properties){
     private val emailService = EmailService(props)
+    fun test(): UserResponse? = transaction {
+        Users.selectAll()
+            .map { row ->
+                UserResponse(
+                    id = row[Users.id].toString(),
+                    email = row[Users.email],
+                    name = row[Users.name],
+                    surname = row[Users.surname],
+                    nickname = row[Users.nickname],
+                    dateOfBirth = row[Users.dateOfBirth].toString(),
+                    homeAddress = row[Users.homeAddress],
+                    phoneNumber = row[Users.phoneNumber],
+                    verified = row[Users.verified]
+                )
+            }.singleOrNull()
+    }
     fun getUserByEmail(email: String): UserResponse? = transaction {
         Users.selectAll().where{ Users.email eq email }
             .map { row ->

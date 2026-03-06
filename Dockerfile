@@ -7,4 +7,5 @@ FROM eclipse-temurin:21-jre-jammy
 EXPOSE 8080
 COPY --from=build /home/gradle/src/build/libs/ktor-app-all.jar /app/ktor-app.jar
 WORKDIR /app
-ENTRYPOINT ["java", "-jar", "ktor-app.jar"]
+RUN cp /local.properties /app/local.properties || true
+ENTRYPOINT ["java", "-jar", "ktor-app.jar", "--local-properties=/local.properties"]
