@@ -24,6 +24,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import com.makebleja.services.JwtService
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 
 fun main(args: Array<String>) {
     val port = System.getenv("PORT")?.toInt() ?: 8080
@@ -61,6 +64,26 @@ fun Application.module() {
     configureSerialization()
     val props = configureDatabases()
     launchOtpCleanup()
+
+    val jwtService = JwtService()
+
+    install(Authentication) {
+
+        jwt("auth-jwt") {
+
+            verifier(jwtService.getVerifier())
+
+            validate { credential ->
+
+                val email = credential.payload.getClaim("email").asString()
+
+                if (email != null)
+                    JWTPrincipal(credential.payload)
+                else
+                    null
+            }
+        }
+    }
 
     install(RateLimit) {
         register(RateLimitName("otp-limit")) {

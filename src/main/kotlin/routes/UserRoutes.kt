@@ -6,6 +6,9 @@ import com.makebleja.models.RegisterUserRequest
 import com.makebleja.models.VerifyCodeRequest
 import com.makebleja.services.UserService
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.plugins.ratelimit.RateLimitName
 import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
@@ -34,14 +37,14 @@ fun Route.userRoutes(userService: UserService) {
         }
         post("/login") {
             val request = call.receive<LoginUserRequest>()
-            val user = userService.logInUser(request)
+            val result = userService.logInUser(request)
             val isVerified = userService.isVerified(request.email)
 
             if(isVerified){
-                if (user != null) {
+                if (result != null) {
                     call.respond(
                         HttpStatusCode.OK,
-                        ApiResponse(success = true, message = "Login successful!", user)
+                        result
                     )
                 } else {
                     call.respond(
@@ -51,6 +54,16 @@ fun Route.userRoutes(userService: UserService) {
                 }
             }else call.respond(HttpStatusCode.BadRequest, ApiResponse(false, "You need to verify your account first!"))
 
+        }
+        authenticate("auth-jwt") {
+
+            get("/me") {
+
+                val principal = call.principal<JWTPrincipal>()
+                val email = principal!!.payload.getClaim("email").asString()
+
+                call.respond(ApiResponse(true, "Authenticated as $email"))
+            }
         }
         rateLimit(RateLimitName("otp-limit")){
             post("/resend-otp") {

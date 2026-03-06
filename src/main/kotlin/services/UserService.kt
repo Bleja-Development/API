@@ -2,6 +2,7 @@ package com.makebleja.services
 
 import com.makebleja.entities.Users
 import com.makebleja.models.ApiResponse
+import com.makebleja.models.LoginResponse
 import com.makebleja.models.LoginUserRequest
 import com.makebleja.models.RegisterUserRequest
 import com.makebleja.models.UserResponse
@@ -147,7 +148,10 @@ class UserService(props: Properties){
         val verified = Users.select(Users.verified).where{ Users.email eq email }.map{ it[Users.verified] }.singleOrNull() ?: false
         verified
     }
-    fun logInUser(request: LoginUserRequest): UserResponse? = transaction {
+
+    private val jwtService = JwtService()
+
+    fun logInUser(request: LoginUserRequest): LoginResponse? = transaction {
         val userRow = Users.selectAll()
             .where { Users.email eq request.email }
             .singleOrNull() ?: return@transaction null
@@ -156,7 +160,7 @@ class UserService(props: Properties){
 
         if (!passwordMatches) return@transaction null
 
-        UserResponse(
+        val user = UserResponse(
             id = userRow[Users.id].toString(),
             email = userRow[Users.email],
             name = userRow[Users.name],
@@ -167,5 +171,9 @@ class UserService(props: Properties){
             phoneNumber = userRow[Users.phoneNumber],
             verified = userRow[Users.verified]
         )
+
+        val token = jwtService.generateToken(user.id, user.email)
+
+        LoginResponse(true, "Login successful!", token, user)
     }
 }
