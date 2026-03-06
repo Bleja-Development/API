@@ -5,7 +5,6 @@ RUN gradle buildFatJar --no-daemon
 
 FROM eclipse-temurin:21-jre-jammy
 EXPOSE 8080
-COPY --from=build /home/gradle/src/build/libs/ktor-app-all.jar /app/ktor-app.jar
-WORKDIR /app
-RUN cp /local.properties /app/local.properties || true
-ENTRYPOINT ["java", "-jar", "ktor-app.jar", "--local-properties=/local.properties"]
+COPY --from=build /home/gradle/src/build/libs/ktor-app-all.jar /ktor-app.jar
+WORKDIR /
+ENTRYPOINT ["java", "-jar", "ktor-app.jar"]
