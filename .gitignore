@@ -26,7 +26,7 @@ out/
 !**/src/test/**/out/
 
 ### Secrets ###
-local.properties
+###local.properties
 
 ### NetBeans ###
 /nbproject/private/

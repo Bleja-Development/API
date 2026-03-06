@@ -7,9 +7,9 @@ import java.io.FileInputStream
 
 fun Application.configureDatabases(): Properties {
     val properties = Properties()
-    val properiesFile = "local.properties"
+    val propertiesFile = "/etc/secrets/local.properties"
 
-    val inputStream = FileInputStream(properiesFile)
+    val inputStream = FileInputStream(propertiesFile)
     properties.load(inputStream)
 
     Database.connect(
