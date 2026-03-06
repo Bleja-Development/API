@@ -19,11 +19,11 @@ fun Route.userRoutes(userService: UserService) {
             val request = call.receive<RegisterUserRequest>()
 
             if (userService.getUserByEmail(request.email) != null) {
-                return@post call.respond(HttpStatusCode.Conflict, ApiResponse(false, "Email taken"))
+                return@post call.respond(HttpStatusCode.Conflict, ApiResponse(false, "Email is already taken"))
             }
 
-            userService.registerUser(request)
-            call.respond(HttpStatusCode.Created, ApiResponse(true, "Success!"))
+            val newUser = userService.registerUser(request)
+            call.respond(HttpStatusCode.Created, ApiResponse(true, "Success! Please verify your email next.", newUser))
         }
         post("/verify"){
             val request = call.receive<VerifyCodeRequest>()
@@ -33,14 +33,14 @@ fun Route.userRoutes(userService: UserService) {
         }
         post("/login") {
             val request = call.receive<LoginUserRequest>()
-            val isSuccess = userService.logInUser(request)
+            val user = userService.logInUser(request)
             val isVerified = userService.isVerified(request.email)
 
             if(isVerified){
-                if (isSuccess) {
+                if (user != null) {
                     call.respond(
                         HttpStatusCode.OK,
-                        ApiResponse(success = true, message = "Login successful!")
+                        ApiResponse(success = true, message = "Login successful!", user)
                     )
                 } else {
                     call.respond(

@@ -11,5 +11,6 @@ data class UserResponse(
     val nickname: String,
     val dateOfBirth: String,
     val homeAddress: String,
-    val phoneNumber: String
+    val phoneNumber: String,
+    val verified: Boolean
 )

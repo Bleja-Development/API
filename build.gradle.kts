@@ -8,7 +8,7 @@ group = "com.makebleja"
 version = "0.0.1"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    mainClass = "com.makebleja.ApplicationKt"
 }
 
 kotlin {
@@ -42,7 +42,14 @@ dependencies {
     implementation("io.ktor:ktor-server-request-validation")
     implementation("io.ktor:ktor-server-status-pages")
     implementation("jakarta.mail:jakarta.mail-api:2.1.2")
-    implementation("org.eclipse.angus:jakarta.mail:2.0.2")
+    implementation("org.eclipse.angus:jakarta.mail:2.0.4")
     implementation("io.ktor:ktor-server-rate-limit")
+    implementation("io.ktor:ktor-server-cors")
     testImplementation(libs.kotlin.test.junit)
+}
+
+ktor {
+    fatJar {
+        archiveFileName.set("ktor-app-all.jar")
+    }
 }

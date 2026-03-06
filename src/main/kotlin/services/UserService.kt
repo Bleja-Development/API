@@ -31,13 +31,14 @@ class UserService(props: Properties){
                     nickname = row[Users.nickname],
                     dateOfBirth = row[Users.dateOfBirth].toString(),
                     homeAddress = row[Users.homeAddress],
-                    phoneNumber = row[Users.phoneNumber]
+                    phoneNumber = row[Users.phoneNumber],
+                    verified = row[Users.verified]
                 )
             }.singleOrNull()
     }
-    fun registerUser(request: RegisterUserRequest) = transaction {
+    fun registerUser(request: RegisterUserRequest): UserResponse = transaction {
         val hashedPassword = BCrypt.hashpw(request.password, BCrypt.gensalt())
-        Users.insert {
+        val newUser = Users.insert {
             it[email] = request.email
             it[name] = request.name
             it[surname] = request.surname
@@ -55,6 +56,18 @@ class UserService(props: Properties){
         }
 
         emailService.sendOtpCode(request.email, randomCode.toString())
+
+        UserResponse(
+            id = newUser[Users.id].toString(),
+            email = newUser[Users.email],
+            name = newUser[Users.name],
+            surname = newUser[Users.surname],
+            nickname = newUser[Users.nickname],
+            dateOfBirth = newUser[Users.dateOfBirth].toString(),
+            homeAddress = newUser[Users.homeAddress],
+            phoneNumber = newUser[Users.phoneNumber],
+            verified = newUser[Users.verified]
+        )
     }
     fun resendOTP(email: String) = transaction {
         val newCode = (100000..999999).random().toString()
@@ -118,13 +131,25 @@ class UserService(props: Properties){
         val verified = Users.select(Users.verified).where{ Users.email eq email }.map{ it[Users.verified] }.singleOrNull() ?: false
         verified
     }
-    fun logInUser(request: LoginUserRequest): Boolean = transaction {
-        val passwordFromDatabase =
-            Users.select(Users.password)
-                .where { Users.email eq request.email }
-                .map { it[Users.password] }
-                .singleOrNull() ?: return@transaction false
+    fun logInUser(request: LoginUserRequest): UserResponse? = transaction {
+        val userRow = Users.selectAll()
+            .where { Users.email eq request.email }
+            .singleOrNull() ?: return@transaction null
 
-        BCrypt.checkpw(request.password, passwordFromDatabase)
+        val passwordMatches = BCrypt.checkpw(request.password, userRow[Users.password])
+
+        if (!passwordMatches) return@transaction null
+
+        UserResponse(
+            id = userRow[Users.id].toString(),
+            email = userRow[Users.email],
+            name = userRow[Users.name],
+            surname = userRow[Users.surname],
+            nickname = userRow[Users.nickname],
+            dateOfBirth = userRow[Users.dateOfBirth].toString(),
+            homeAddress = userRow[Users.homeAddress],
+            phoneNumber = userRow[Users.phoneNumber],
+            verified = userRow[Users.verified]
+        )
     }
 }

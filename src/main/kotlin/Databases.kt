@@ -7,16 +7,19 @@ import java.io.FileInputStream
 
 fun Application.configureDatabases(): Properties {
     val properties = Properties()
-    val properiesFile = "local.properties"
+    val dbUrl = System.getenv("DB_URL") ?: ""
+    val dbUser = System.getenv("DB_USER") ?: ""
+    val dbPass = System.getenv("DB_PASSWORD") ?: ""
 
-    val inputStream = FileInputStream(properiesFile)
-    properties.load(inputStream)
+    properties.setProperty("url", dbUrl)
+    properties.setProperty("user", dbUser)
+    properties.setProperty("password", dbPass)
 
     Database.connect(
-        url = properties.getProperty("db.url") ?: "dummy_url",
+        url = dbUrl,
         driver = "org.postgresql.Driver",
-        user = properties.getProperty("db.user") ?: "dummy_user",
-        password = properties.getProperty("db.password") ?: "dummy_password"
+        user = dbUser,
+        password = dbPass
     )
 
     return properties

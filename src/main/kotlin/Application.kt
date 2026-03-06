@@ -26,7 +26,13 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 fun main(args: Array<String>) {
-    io.ktor.server.netty.EngineMain.main(args)
+    val port = System.getenv("PORT")?.toInt() ?: 8080
+    io.ktor.server.engine.embeddedServer(
+        io.ktor.server.netty.Netty,
+        port = port,
+        host = "0.0.0.0",
+        module = Application::module
+    ).start(wait = true)
 }
 
 fun Application.launchOtpCleanup(){
@@ -44,6 +50,14 @@ fun Application.launchOtpCleanup(){
     }
 }
 fun Application.module() {
+    install(io.ktor.server.plugins.cors.routing.CORS) {
+        anyHost()
+        allowMethod(io.ktor.http.HttpMethod.Options)
+        allowMethod(io.ktor.http.HttpMethod.Post)
+        allowMethod(io.ktor.http.HttpMethod.Get)
+        allowHeader(io.ktor.http.HttpHeaders.ContentType)
+        allowHeader(io.ktor.http.HttpHeaders.Authorization)
+    }
     configureSerialization()
     val props = configureDatabases()
     launchOtpCleanup()

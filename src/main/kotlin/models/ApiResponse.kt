@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ApiResponse(
     val success: Boolean,
     val message: String,
-    val field: String? = null
+    val user: UserResponse? = null
 )
