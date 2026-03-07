@@ -61,8 +61,9 @@ fun Route.userRoutes(userService: UserService) {
 
                 val principal = call.principal<JWTPrincipal>()
                 val email = principal!!.payload.getClaim("email").asString()
+                val user = userService.getUserByEmail(email)
 
-                call.respond(ApiResponse(true, "Authenticated as $email"))
+                call.respond(ApiResponse(true, "Authenticated as $email", user))
             }
         }
         rateLimit(RateLimitName("otp-limit")){
