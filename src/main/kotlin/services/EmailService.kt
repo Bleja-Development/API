@@ -21,9 +21,12 @@ class EmailService() {
     fun sendOtpCode(toEmail: String, code: String) {
         val smtpProps = Properties().apply {
             put("mail.smtp.auth", "true")
-            put("mail.smtp.starttls.enable", "true")
+            put("mail.smtp.starttls.enable", "false")
             put("mail.smtp.host", "smtp.gmail.com")
-            put("mail.smtp.port", "587")
+            put("mail.smtp.port", "465")
+            put("mail.smtp.ssl.enable", "true")
+            put("mail.smtp.socketFactory.port", "465")
+            put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory")
         }
 
         val session = Session.getInstance(smtpProps, object : Authenticator() {
