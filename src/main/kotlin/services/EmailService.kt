@@ -1,5 +1,7 @@
 package com.makebleja.services
 
+import com.typesafe.config.ConfigFactory
+import io.ktor.server.config.HoconApplicationConfig
 import jakarta.mail.Authenticator
 import jakarta.mail.Message
 import jakarta.mail.MessagingException
@@ -10,9 +12,11 @@ import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
 import java.util.Properties
 
-class EmailService(private val props: Properties) {
-    private val username = props.getProperty("email.user")
-    private val password = props.getProperty("email.password")
+class EmailService() {
+    private val config = HoconApplicationConfig(ConfigFactory.load())
+
+    private val username = config.propertyOrNull("email.user")?.getString() ?: ""
+    private val password = config.propertyOrNull("email.password")?.getString() ?: ""
 
     fun sendOtpCode(toEmail: String, code: String) {
         val smtpProps = Properties().apply {

@@ -17,10 +17,9 @@ import org.jetbrains.exposed.v1.jdbc.update
 import org.mindrot.jbcrypt.BCrypt
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Properties
 
-class UserService(props: Properties){
-    private val emailService = EmailService(props)
+class UserService(){
+    private val emailService = EmailService()
     fun test(): UserResponse? = transaction {
         Users.selectAll()
             .map { row ->

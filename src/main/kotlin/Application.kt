@@ -62,7 +62,7 @@ fun Application.module() {
         allowHeader(io.ktor.http.HttpHeaders.Authorization)
     }
     configureSerialization()
-    val props = configureDatabases()
+    configureDatabases()
     launchOtpCleanup()
 
     val jwtService = JwtService()
@@ -92,7 +92,7 @@ fun Application.module() {
         }
     }
 
-    val userService = UserService(props)
+    val userService = UserService()
     configureRouting(userService)
 
 

@@ -1,23 +1,21 @@
 package com.makebleja
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.*
+import io.ktor.server.config.HoconApplicationConfig
 import org.jetbrains.exposed.v1.jdbc.Database
-import java.util.Properties
-import java.io.FileInputStream
 
-fun Application.configureDatabases(): Properties {
-    val properties = Properties()
-    val propertiesFile = "/etc/secrets/local.properties"
+fun Application.configureDatabases() {
+    val config = HoconApplicationConfig(ConfigFactory.load())
 
-    val inputStream = FileInputStream(propertiesFile)
-    properties.load(inputStream)
+    val dbUser = config.propertyOrNull("postgres.user")?.getString() ?: ""
+    val dbUrl = config.propertyOrNull("postgres.url")?.getString() ?: ""
+    val dbPassword = config.propertyOrNull("postgres.password")?.getString() ?: ""
 
     Database.connect(
-        url = properties.getProperty("db.url") ?: "dummy_url",
+        url = dbUrl,
         driver = "org.postgresql.Driver",
-        user = properties.getProperty("db.user") ?: "dummy_user",
-        password = properties.getProperty("db.password") ?: "dummy_password"
+        user = dbUser,
+        password = dbPassword
     )
-
-    return properties
 }
